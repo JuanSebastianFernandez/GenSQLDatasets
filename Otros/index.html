@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Web Completa</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Bienvenidos a mi Página Web</h1>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#acerca">Acerca de</a></li>
+                <li><a href="#galeria">Galería</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="inicio">
+            <h2>Inicio</h2>
+            <p>Esta es una página web completa creada con HTML.</p>
+            <figure>
+                <img src="imagen.jpg" alt="Imagen de ejemplo">
+                <figcaption>Descripción de la imagen</figcaption>
+            </figure>
+            <details>
+                <summary>Más información</summary>
+                <p>Este es un detalle expandible con más información.</p>
+            </details>
+        </section>
+        
+        <section id="acerca">
+            <h2>Acerca de</h2>
+            <article>
+                <p>Este es un ejemplo de cómo estructurar una página completa utilizando etiquetas HTML.</p>
+            </article>
+            <aside>
+                <h3>Información adicional</h3>
+                <p>Este contenido está relacionado pero no es parte del contenido principal.</p>
+            </aside>
+        </section>
+        
+        <section id="galeria">
+            <h2>Galería</h2>
+            <video controls>
+                <source src="video.mp4" type="video/mp4">
+                Tu navegador no soporta el elemento de video.
+            </video>
+            <audio controls>
+                <source src="audio.mp3" type="audio/mpeg">
+                Tu navegador no soporta el elemento de audio.
+            </audio>
+        </section>
+        
+        <section id="contacto">
+            <h2>Contacto</h2>
+            <form action="#" method="post">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+                <br>
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" required>
+                <br>
+                <label for="mensaje">Mensaje:</label>
+                <textarea id="mensaje" name="mensaje" required></textarea>
+                <br>
+                <button type="submit">Enviar</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <hr>
+        <p>&copy; 2025 Mi Página Web</p>
+        <address>
+            <p>Contacto: <a href="mailto:info@mipagina.com">info@mipagina.com</a></p>
+        </address>
+    </footer>
+</body>
+</html>

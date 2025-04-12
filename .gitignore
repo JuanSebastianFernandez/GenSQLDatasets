@@ -1,0 +1,18 @@
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+venv/
+.env
+
+# Archivos de logs
+*.log
+logs/
+
+# Configuraciones de IDEs
+.vscode/
+.idea/
+
+# Dependencias
+node_modules/

@@ -1,0 +1,153 @@
+-- Step 1: Create the Database Tables (Scenario: University Course Management)
+
+-- Creating a "Professors" table without using an ID as the primary key
+CREATE TABLE Professors (
+    email VARCHAR(100) PRIMARY KEY,  -- Using email as the primary key instead of an ID
+    full_name VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL
+);
+
+-- Inserting sample data
+INSERT INTO Professors (email, full_name, department) VALUES
+('john.doe@university.edu', 'John Doe', 'Computer Science');
+INSERT INTO Professors (email, full_name, department) VALUES
+('mary.smith@university.edu', 'Mary Smith', 'Mathematics');
+INSERT INTO Professors (email, full_name, department) VALUES
+('alice.jones@university.edu', 'Alice Jones', 'Physics');
+
+-- Creating a "Courses" table without using an ID as the primary key
+CREATE TABLE Courses (
+    course_code VARCHAR(10) PRIMARY KEY,  -- Using course_code as the primary key
+    title VARCHAR(100) NOT NULL,
+    credits INT CHECK (credits > 0),
+    professor_email VARCHAR(100),
+    FOREIGN KEY (professor_email) REFERENCES Professors(email)
+);
+
+-- Inserting sample data
+INSERT INTO Courses (course_code, title, credits, professor_email) VALUES
+('CS101', 'Introduction to Programming', 3, 'john.doe@university.edu');
+INSERT INTO Courses (course_code, title, credits, professor_email) VALUES
+('MATH201', 'Linear Algebra', 4, 'mary.smith@university.edu');
+INSERT INTO Courses (course_code, title, credits, professor_email) VALUES
+('PHY150', 'Physics I', 4, 'alice.jones@university.edu');
+
+-- Creating a "Students" table without using an ID as the primary key
+CREATE TABLE Students (
+    student_email VARCHAR(100) PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    major VARCHAR(50) NOT NULL
+);
+
+-- Inserting sample data
+INSERT INTO Students (student_email, full_name, major) VALUES
+('jane.doe@student.edu', 'Jane Doe', 'Computer Science');
+INSERT INTO Students (student_email, full_name, major) VALUES
+('michael.lee@student.edu', 'Michael Lee', 'Mathematics');
+INSERT INTO Students (student_email, full_name, major) VALUES
+('emma.white@student.edu', 'Emma White', 'Physics');
+
+-- Creating an "Enrollments" table to manage student-course relationships
+CREATE TABLE Enrollments (
+    student_email VARCHAR(100),
+    course_code VARCHAR(10),
+    semester VARCHAR(10),
+    PRIMARY KEY (student_email, course_code, semester),
+    FOREIGN KEY (student_email) REFERENCES Students(student_email),
+    FOREIGN KEY (course_code) REFERENCES Courses(course_code)
+);
+
+-- Inserting sample data
+INSERT INTO Enrollments (student_email, course_code, semester) VALUES
+('jane.doe@student.edu', 'CS101', 'Spring2025');
+INSERT INTO Enrollments (student_email, course_code, semester) VALUES
+('michael.lee@student.edu', 'MATH201', 'Spring2025');
+INSERT INTO Enrollments (student_email, course_code, semester) VALUES
+('emma.white@student.edu', 'PHY150', 'Fall2024');
+
+-- Step 2: Queries
+
+-- Query to find courses with at least three students enrolled in different semesters
+SELECT course_code, COUNT(DISTINCT semester) AS num_semesters
+FROM Enrollments
+GROUP BY course_code
+HAVING COUNT(DISTINCT semester) >= 3;
+
+-- Query to find courses with at least one student enrolled
+SELECT c.course_code, c.title, COUNT(e.student_email) AS num_students
+FROM Courses c
+LEFT JOIN Enrollments e ON c.course_code = e.course_code
+GROUP BY c.course_code, c.title
+HAVING COUNT(e.student_email) > 0;
+
+-- Query to report professors with the number of courses they teach
+SELECT p.full_name, p.department, COUNT(c.course_code) AS num_courses
+FROM Professors p
+LEFT JOIN Courses c ON p.email = c.professor_email
+GROUP BY p.full_name, p.department;
+
+-- Query to list students along with the courses they are enrolled in
+SELECT s.full_name AS student_name, s.major, e.course_code, c.title AS course_title, e.semester
+FROM Students s
+JOIN Enrollments e ON s.student_email = e.student_email
+JOIN Courses c ON e.course_code = c.course_code
+ORDER BY s.full_name;
+
+-- Step 3: Stored Procedures
+
+-- Procedure to enroll a student in a course if not already enrolled
+CREATE OR REPLACE PROCEDURE enroll_student (
+    p_student_email IN VARCHAR2,
+    p_course_code IN VARCHAR2,
+    p_semester IN VARCHAR2
+) AS
+    v_count INT;
+BEGIN
+    SELECT COUNT(*) INTO v_count FROM Enrollments 
+    WHERE student_email = p_student_email AND course_code = p_course_code AND semester = p_semester;
+    
+    IF v_count = 0 THEN
+        INSERT INTO Enrollments (student_email, course_code, semester)
+        VALUES (p_student_email, p_course_code, p_semester);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Student already enrolled in this course.');
+    END IF;
+END;
+/
+
+-- Step 4: Views
+
+-- View to show a student's enrolled courses
+CREATE VIEW student_courses AS
+SELECT s.full_name, e.course_code, c.title, e.semester
+FROM Students s
+JOIN Enrollments e ON s.student_email = e.student_email
+JOIN Courses c ON e.course_code = c.course_code;
+
+-- View to list all professors and the courses they teach
+CREATE VIEW professor_courses AS
+SELECT p.full_name AS professor_name, p.department, c.course_code, c.title
+FROM Professors p
+LEFT JOIN Courses c ON p.email = c.professor_email;
+
+-- Step 5: Triggers
+
+-- Trigger to prevent duplicate enrollments for the same student, course, and semester
+CREATE OR REPLACE TRIGGER prevent_duplicate_enrollments
+BEFORE INSERT ON Enrollments
+FOR EACH ROW
+DECLARE
+    v_count INT;
+BEGIN
+    SELECT COUNT(*) INTO v_count FROM Enrollments
+    WHERE student_email = :NEW.student_email AND course_code = :NEW.course_code AND semester = :NEW.semester;
+    
+    IF v_count > 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Duplicate enrollment detected.');
+    END IF;
+END;
+/
+
+
+
+
